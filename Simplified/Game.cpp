@@ -7,7 +7,7 @@
 using namespace std;
 
 void KarlsQuit() {
-  cerr << "Karl Wins"<<endl;
+  cerr << "Game End"<<endl;
   SDL_Quit();
 }
 
