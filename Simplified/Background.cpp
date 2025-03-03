@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
-#include "SDL.h"
+#include <SDL.h>
 #include "Background.h"
 
 using namespace std;

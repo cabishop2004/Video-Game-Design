@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
-#include "SDL.h"
+#include <SDL.h>
 #include "Game.h"
 
 using namespace std;
@@ -20,7 +20,7 @@ void KarlsQuit() {
       return;
     }
     atexit(KarlsQuit);
-    window = SDL_CreateWindow("Karl Wins",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,800, 600,0);
+    window = SDL_CreateWindow("Greek Video Game",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,800, 600,0);
     if(!window){
         cerr << "Failed to create window"<<endl;
         running=false;
