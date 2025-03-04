@@ -16,12 +16,14 @@ class MyGame : public Game {
     BouncingFace *bf;
     vector<BouncingFace *> faces;
     Background *back;
-    bool paused; 
+    bool paused;
+    bool showCyclops;
     SDL_Texture *pauseTexture;
+    SDL_Texture *cyclopsTexture;
     SDL_RendererFlip flip; // Flip state for character
 
 public:
-    MyGame(int level = 1) : Game(), paused(false), pauseTexture(nullptr), flip(SDL_FLIP_NONE) {
+    MyGame(int level = 1) : Game(), paused(false), showCyclops(true), pauseTexture(nullptr), cyclopsTexture(nullptr), flip(SDL_FLIP_NONE) {
         srand(level);
         bf = new BouncingFace(getRen(), 5, 200, 0, 0, 0, 600 - 96);
         back = new Background(getRen());
@@ -33,6 +35,16 @@ public:
             SDL_FreeSurface(pauseSurface);
         } else {
             cerr << "Failed to load pause image" << endl;
+        }
+
+        SDL_Surface *cyclopsSurface = SDL_LoadBMP("Cyclops.bmp");
+        if (cyclopsSurface) {
+            // Set the green color (0, 255, 0) as transparent
+            SDL_SetColorKey(cyclopsSurface, SDL_TRUE, SDL_MapRGB(cyclopsSurface->format, 0, 255, 0));
+            cyclopsTexture = SDL_CreateTextureFromSurface(getRen(), cyclopsSurface);
+            SDL_FreeSurface(cyclopsSurface);
+        } else {
+            cerr << "Failed to load Cyclops image" << endl;
         }
     }
 
@@ -52,6 +64,11 @@ public:
         if (paused && pauseTexture) {
             SDL_Rect pauseRect = {200, 150, 400, 300};
             SDL_RenderCopy(getRen(), pauseTexture, NULL, &pauseRect);
+        }
+
+        if (showCyclops && cyclopsTexture) {
+            SDL_Rect cyclopsRect = {800 - 378, 100, 378, 661}; // Position on the far right with full size
+            SDL_RenderCopy(getRen(), cyclopsTexture, NULL, &cyclopsRect);
         }
 
         SDL_RenderPresent(getRen());
@@ -87,6 +104,9 @@ public:
                     case SDLK_m:
                         paused = !paused;
                         break;
+                    case SDLK_l:
+                        showCyclops = !showCyclops; // Toggle Cyclops display
+                        break;
                 }
             }
             else if (event.type == SDL_KEYUP) {
@@ -104,6 +124,7 @@ public:
         delete bf;
         delete back;
         if (pauseTexture) SDL_DestroyTexture(pauseTexture);
+        if (cyclopsTexture) SDL_DestroyTexture(cyclopsTexture);
     }
 };
 
