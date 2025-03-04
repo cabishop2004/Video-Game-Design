@@ -1,0 +1,15 @@
+Sorry I can't be here today. I'm competeting at an archery competition in Las Vegas.
+
+What did I, Ian, work on:
+* Character art - Made through ChatGPT and further modified by Ian
+* Cyclops art - Made through ChatGPT and further modified by Ian
+* Physics engine started with Castleton provided code, but modified
+* Story line premise
+* Need different Makefiles. Ian's computer isn't using WSL properly.
+
+What We need to improve/Future goals
+* Art imrpovements/New art
+* Music, special music for boss fights
+* Enemy navigation
+* Attacks: Player(Sword, Bow) Enemy(mele) Boss(mele and ranged/beam attack)
+*
