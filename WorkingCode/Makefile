@@ -20,3 +20,4 @@ ${EXE}: ${SRC} ${OBJS}
 
 clean:
 	rm -f ${EXE} ${OBJS}
+	#del /Q ${EXE} ${OBJS}

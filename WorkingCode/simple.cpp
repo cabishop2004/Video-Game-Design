@@ -18,17 +18,21 @@ class MyGame : public Game {
     Background *back;
     bool paused;
     bool showCyclops;
+    bool showFury;
     SDL_Texture *pauseTexture;
     SDL_Texture *cyclopsTexture;
-    SDL_RendererFlip flip; // Flip state for character
+    SDL_Texture *furyTexture;
+    SDL_RendererFlip flip;
 
 public:
-    MyGame(int level = 1) : Game(), paused(false), showCyclops(true), pauseTexture(nullptr), cyclopsTexture(nullptr), flip(SDL_FLIP_NONE) {
+    MyGame(int level = 1) : Game(), paused(false), showCyclops(true), showFury(true), 
+                            pauseTexture(nullptr), cyclopsTexture(nullptr), furyTexture(nullptr), flip(SDL_FLIP_NONE) {
         srand(level);
         bf = new BouncingFace(getRen(), 5, 200, 0, 0, 0, 600 - 96);
         back = new Background(getRen());
         dt = .01;
 
+        // Load pause image
         SDL_Surface *pauseSurface = SDL_LoadBMP("pause.bmp");
         if (pauseSurface) {
             pauseTexture = SDL_CreateTextureFromSurface(getRen(), pauseSurface);
@@ -37,14 +41,24 @@ public:
             cerr << "Failed to load pause image" << endl;
         }
 
+        // Load Cyclops image
         SDL_Surface *cyclopsSurface = SDL_LoadBMP("Cyclops.bmp");
         if (cyclopsSurface) {
-            // Set the green color (0, 255, 0) as transparent
             SDL_SetColorKey(cyclopsSurface, SDL_TRUE, SDL_MapRGB(cyclopsSurface->format, 0, 255, 0));
             cyclopsTexture = SDL_CreateTextureFromSurface(getRen(), cyclopsSurface);
             SDL_FreeSurface(cyclopsSurface);
         } else {
             cerr << "Failed to load Cyclops image" << endl;
+        }
+
+        // Load Fury image
+        SDL_Surface *furySurface = SDL_LoadBMP("fury.bmp");
+        if (furySurface) {
+            SDL_SetColorKey(furySurface, SDL_TRUE, SDL_MapRGB(furySurface->format, 0, 255, 255)); // Green transparency
+            furyTexture = SDL_CreateTextureFromSurface(getRen(), furySurface);
+            SDL_FreeSurface(furySurface);
+        } else {
+            cerr << "Failed to load Fury image" << endl;
         }
     }
 
@@ -61,14 +75,22 @@ public:
 
         for (auto face : faces) face->render(getRen());
 
+        // Render pause screen
         if (paused && pauseTexture) {
             SDL_Rect pauseRect = {200, 150, 400, 300};
             SDL_RenderCopy(getRen(), pauseTexture, NULL, &pauseRect);
         }
 
+        // Render Cyclops if enabled
         if (showCyclops && cyclopsTexture) {
-            SDL_Rect cyclopsRect = {800 - 378, 100, 378, 661}; // Position on the far right with full size
+            SDL_Rect cyclopsRect = {800 - 378, 100, 378, 661};
             SDL_RenderCopy(getRen(), cyclopsTexture, NULL, &cyclopsRect);
+        }
+
+        // Render Fury if enabled
+        if (showFury && furyTexture) {
+            SDL_Rect furyRect = {200, 600 - 150, 150, 150}; // Position and size
+            SDL_RenderCopy(getRen(), furyTexture, NULL, &furyRect);
         }
 
         SDL_RenderPresent(getRen());
@@ -92,20 +114,23 @@ public:
                     case SDLK_a:
                         if (!paused) {
                             bf->setVx(-150);
-                            flip = SDL_FLIP_HORIZONTAL; // Flip left
+                            flip = SDL_FLIP_HORIZONTAL;
                         }
                         break;
                     case SDLK_d:
                         if (!paused) {
                             bf->setVx(150);
-                            flip = SDL_FLIP_NONE; // Reset flip (right)
+                            flip = SDL_FLIP_NONE;
                         }
                         break;
                     case SDLK_m:
                         paused = !paused;
                         break;
                     case SDLK_l:
-                        showCyclops = !showCyclops; // Toggle Cyclops display
+                        showCyclops = !showCyclops;
+                        break;
+                    case SDLK_k:
+                        showFury = !showFury; // Toggle Fury display
                         break;
                 }
             }
@@ -117,6 +142,11 @@ public:
                         break;
                 }
             }
+            else if (event.type == SDL_MOUSEBUTTONDOWN) {  // Detect mouse click for attack
+                if (event.button.button == SDL_BUTTON_LEFT && !paused) {
+                    bf->attack();
+                }
+            }
         }
     }
 
@@ -125,6 +155,7 @@ public:
         delete back;
         if (pauseTexture) SDL_DestroyTexture(pauseTexture);
         if (cyclopsTexture) SDL_DestroyTexture(cyclopsTexture);
+        if (furyTexture) SDL_DestroyTexture(furyTexture);
     }
 };
 

@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <iostream>
-#include <SDL.h>
+#include "SDL.h"
 #include "BouncingFace.h"
 
 using namespace std;
@@ -11,6 +11,9 @@ void BouncingFace::bounce() { bounceX(); bounceY(); }
 
 BouncingFace::BouncingFace(SDL_Renderer *ren, float ax0, float ay0, float vx0, float vy0, float x0, float y0) {
     ready = false;
+    attacking = false;
+    attackTimer = 0;
+    
     surface = SDL_LoadBMP("face.bmp");
     if (!surface) {
         cerr << "Failed to load image" << endl;
@@ -35,8 +38,10 @@ BouncingFace::BouncingFace(SDL_Renderer *ren, float ax0, float ay0, float vx0, f
 }
 
 void BouncingFace::loop(float dt) {
-    // Apply gravity
-    vy += ay * dt;
+    // Apply gravity if character is above bottom 1/4 of the screen
+    if (y < 600 - 96) {
+        vy += ay * dt;
+    }
     
     // Update position
     x += vx * dt;
@@ -48,15 +53,32 @@ void BouncingFace::loop(float dt) {
     // Handle floor collision (prevents falling below the screen)
     if (y >= 600 - 96) {
         y = 600 - 96;
-        vy = 0;  // Stop downward motion when landing
+        vy = 0;
     }
 
     // Screen bounds (left/right)
     if (x < 0) x = 0;
     if (x > 800 - 96) x = 800 - 96;
+
+    // Handle attack timer
+    if (attacking) {
+        attackTimer -= dt;
+        if (attackTimer <= 0) {
+            attacking = false;
+        }
+    }
 }
 
 void BouncingFace::render(SDL_Renderer *ren, SDL_RendererFlip flip) {
+    if (attacking) {
+        SDL_SetTextureColorMod(t, 255, 0, 0);  // Red tint when attacking
+    } else {
+        SDL_SetTextureColorMod(t, 255, 255, 255);  // Normal color
+    }
     SDL_RenderCopyEx(ren, t, NULL, &rect, 0, NULL, flip);
 }
 
+void BouncingFace::attack() {
+    attacking = true;
+    attackTimer = attackDuration;
+}
