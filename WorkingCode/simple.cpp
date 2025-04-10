@@ -108,7 +108,7 @@ public:
                         break;
                     case SDLK_SPACE:
                         if (!paused && bf->getY() >= 600 - 96) {
-                            bf->setVy(-200);
+                            bf->setVy(-280);
                         }
                         break;
                     case SDLK_a:

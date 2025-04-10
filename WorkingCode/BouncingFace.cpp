@@ -13,7 +13,7 @@ BouncingFace::BouncingFace(SDL_Renderer *ren, float ax0, float ay0, float vx0, f
     ready = false;
     attacking = false;
     attackTimer = 0;
-    
+
     surface = SDL_LoadBMP("face.bmp");
     if (!surface) {
         cerr << "Failed to load image" << endl;
@@ -24,6 +24,17 @@ BouncingFace::BouncingFace(SDL_Renderer *ren, float ax0, float ay0, float vx0, f
     if (!t) {
         cerr << "Failed to create texture" << endl;
         return;
+    }
+
+    // Load sword image
+    SDL_Surface* swordSurface = SDL_LoadBMP("sword.bmp");
+    if (swordSurface) {
+        SDL_SetColorKey(swordSurface, SDL_TRUE, SDL_MapRGB(swordSurface->format, 0, 255, 0));
+        sword = SDL_CreateTextureFromSurface(ren, swordSurface);
+        SDL_FreeSurface(swordSurface);
+    } else {
+        cerr << "Failed to load sword image" << endl;
+        sword = nullptr;
     }
 
     rect.w = 96;
@@ -38,29 +49,24 @@ BouncingFace::BouncingFace(SDL_Renderer *ren, float ax0, float ay0, float vx0, f
 }
 
 void BouncingFace::loop(float dt) {
-    // Apply gravity if character is above bottom 1/4 of the screen
     if (y < 600 - 96) {
         vy += ay * dt;
     }
-    
-    // Update position
+
     x += vx * dt;
     y += vy * dt;
 
     rect.x = x;
     rect.y = y;
 
-    // Handle floor collision (prevents falling below the screen)
     if (y >= 600 - 96) {
         y = 600 - 96;
         vy = 0;
     }
 
-    // Screen bounds (left/right)
     if (x < 0) x = 0;
     if (x > 800 - 96) x = 800 - 96;
 
-    // Handle attack timer
     if (attacking) {
         attackTimer -= dt;
         if (attackTimer <= 0) {
@@ -70,15 +76,28 @@ void BouncingFace::loop(float dt) {
 }
 
 void BouncingFace::render(SDL_Renderer *ren, SDL_RendererFlip flip) {
-    if (attacking) {
-        SDL_SetTextureColorMod(t, 255, 0, 0);  // Red tint when attacking
-    } else {
-        SDL_SetTextureColorMod(t, 255, 255, 255);  // Normal color
-    }
+
     SDL_RenderCopyEx(ren, t, NULL, &rect, 0, NULL, flip);
+
+    if (attacking && sword) {
+        SDL_Rect swordRect;
+        swordRect.w = 50;
+        swordRect.h = 24;
+
+        if (flip == SDL_FLIP_NONE) {
+            swordRect.x = x + 70;
+        } else {
+            swordRect.x = x - 20;
+        }
+        swordRect.y = y + 40;
+
+        SDL_RenderCopyEx(ren, sword, NULL, &swordRect, 0, NULL, flip);
+    }
 }
 
 void BouncingFace::attack() {
     attacking = true;
     attackTimer = attackDuration;
 }
+
+//float BouncingFace::getX() { return x; }  // Optional: already used in render logic
