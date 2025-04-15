@@ -48,6 +48,7 @@ public:
         srand(level);
         bf = new BouncingFace(getRen(), 5, 200, 0, 0, 0, 600 - 96);
         back = new Background(getRen());
+        //will eventually make a loop to read enemies from a file
         cyclops = new Enemy("Cyclops.bmp", getRen(), false, 378, 661, 422, 100, 0, 0, 0, 0);
         fury = new Enemy("fury.bmp", getRen(), true, 150, 150, 200, 450, 0, 0, 0, 0);
         dt = .01;
@@ -306,6 +307,7 @@ public:
 
     ~MyGame() {
         delete bf;
+        //eventually make a loop to delete enemies
         delete cyclops;
         delete fury;
         delete back;
