@@ -1,7 +1,7 @@
 PROJ=simple
 EXE=${PROJ}.exe
 SRC=${PROJ}.cpp
-SRCS=Background BouncingFace Game
+SRCS=Background BouncingFace Game Enemy
 CPPFiles=$(foreach item,$(SRCS),$(item).cpp)
 OBJS=$(foreach item,$(SRCS),$(item).o)
 HEADERS=$(foreach item,$(SRCS),$(item).h)

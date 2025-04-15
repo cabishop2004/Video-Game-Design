@@ -6,6 +6,7 @@
 #include "Game.h"
 #include "BouncingFace.h"
 #include "Background.h"
+#include "Enemy.h"
 
 using namespace std;
 
@@ -14,11 +15,13 @@ float vx = 20;
 class MyGame : public Game {
     float dt;
     BouncingFace *bf;
+    Enemy *cyclops;
+    Enemy *fury;
     vector<BouncingFace *> faces;
     Background *back;
     bool paused;
-    bool showCyclops;
-    bool showFury;
+    // bool showCyclops;
+    // bool showFury;
     bool mapMode;
     bool inAreaOne = false;
     bool inAreaTwo = false;
@@ -31,22 +34,22 @@ class MyGame : public Game {
     SDL_Texture *newAreaTwoTexture;
     SDL_Texture *newAreaThreeTexture;
     SDL_Texture *newAreaFourTexture;
-    SDL_Texture *cyclopsTexture;
-    SDL_Texture *furyTexture;
+    // SDL_Texture *cyclopsTexture;
+    // SDL_Texture *furyTexture;
     SDL_Texture *mapTexture;
     SDL_Texture *greekTextTexture;
 
     SDL_RendererFlip flip;
 
 public:
-    MyGame(int level = 1) : Game(), paused(false), showCyclops(true), showFury(true),
-                            mapMode(false),inAreaOne(false), inAreaTwo(false), inAreaThree(false), inAreaFour(false), 
+    MyGame(int level = 1) : Game(), paused(false), mapMode(false),inAreaOne(false), inAreaTwo(false), inAreaThree(false), inAreaFour(false), 
                             pauseTexture(nullptr), newAreaOneTexture(nullptr), newAreaTwoTexture(nullptr), newAreaThreeTexture(nullptr), newAreaFourTexture(nullptr),
-                            running(true), cyclopsTexture(nullptr), furyTexture(nullptr),
-                            mapTexture(nullptr), greekTextTexture(nullptr), flip(SDL_FLIP_NONE) {
+                            running(true), mapTexture(nullptr), greekTextTexture(nullptr), flip(SDL_FLIP_NONE) {
         srand(level);
         bf = new BouncingFace(getRen(), 5, 200, 0, 0, 0, 600 - 96);
         back = new Background(getRen());
+        cyclops = new Enemy("Cyclops.bmp", getRen(), false, 378, 661, 422, 100, 0, 0, 0, 0);
+        fury = new Enemy("fury.bmp", getRen(), true, 150, 150, 200, 450, 0, 0, 0, 0);
         dt = .01;
 
         // Load pause image
@@ -64,49 +67,49 @@ public:
             newAreaOneTexture = SDL_CreateTextureFromSurface(getRen(), newAreaOneSurface);
             SDL_FreeSurface(newAreaOneSurface);
         } else {
-            cerr << "Failed to load new area image" << endl;
+            cerr << "Failed to load new area image 1" << endl;
         }
         SDL_Surface *newAreaTwoSurface = SDL_LoadBMP("areaTwo.bmp");
         if (newAreaTwoSurface) {
             newAreaTwoTexture = SDL_CreateTextureFromSurface(getRen(), newAreaTwoSurface);
             SDL_FreeSurface(newAreaTwoSurface);
         } else {
-            cerr << "Failed to load new area image" << endl;
+            cerr << "Failed to load new area image 2" << endl;
         }
         SDL_Surface *newAreaThreeSurface = SDL_LoadBMP("areaThree.bmp");
         if (newAreaThreeSurface) {
             newAreaThreeTexture = SDL_CreateTextureFromSurface(getRen(), newAreaThreeSurface);
             SDL_FreeSurface(newAreaThreeSurface);
         } else {
-            cerr << "Failed to load new area image" << endl;
+            cerr << "Failed to load new area image 3" << endl;
         }
         SDL_Surface *newAreaFourSurface = SDL_LoadBMP("areaFour.bmp");
         if (newAreaFourSurface) {
             newAreaFourTexture = SDL_CreateTextureFromSurface(getRen(), newAreaFourSurface);
             SDL_FreeSurface(newAreaFourSurface);
         } else {
-            cerr << "Failed to load new area image" << endl;
+            cerr << "Failed to load new area image 4" << endl;
         }
 
         // Load Cyclops image
-        SDL_Surface *cyclopsSurface = SDL_LoadBMP("Cyclops.bmp");
-        if (cyclopsSurface) {
-            SDL_SetColorKey(cyclopsSurface, SDL_TRUE, SDL_MapRGB(cyclopsSurface->format, 0, 255, 0));
-            cyclopsTexture = SDL_CreateTextureFromSurface(getRen(), cyclopsSurface);
-            SDL_FreeSurface(cyclopsSurface);
-        } else {
-            cerr << "Failed to load Cyclops image" << endl;
-        }
+        // SDL_Surface *cyclopsSurface = SDL_LoadBMP("Cyclops.bmp");
+        // if (cyclopsSurface) {
+        //     SDL_SetColorKey(cyclopsSurface, SDL_TRUE, SDL_MapRGB(cyclopsSurface->format, 0, 255, 0));
+        //     cyclopsTexture = SDL_CreateTextureFromSurface(getRen(), cyclopsSurface);
+        //     SDL_FreeSurface(cyclopsSurface);
+        // } else {
+        //     cerr << "Failed to load Cyclops image" << endl;
+        // }
 
         // Load Fury image
-        SDL_Surface *furySurface = SDL_LoadBMP("fury.bmp");
-        if (furySurface) {
-            SDL_SetColorKey(furySurface, SDL_TRUE, SDL_MapRGB(furySurface->format, 0, 255, 255));
-            furyTexture = SDL_CreateTextureFromSurface(getRen(), furySurface);
-            SDL_FreeSurface(furySurface);
-        } else {
-            cerr << "Failed to load Fury image" << endl;
-        }
+        // SDL_Surface *furySurface = SDL_LoadBMP("fury.bmp");
+        // if (furySurface) {
+        //     SDL_SetColorKey(furySurface, SDL_TRUE, SDL_MapRGB(furySurface->format, 0, 255, 255));
+        //     furyTexture = SDL_CreateTextureFromSurface(getRen(), furySurface);
+        //     SDL_FreeSurface(furySurface);
+        // } else {
+        //     cerr << "Failed to load Fury image" << endl;
+        // }
 
         // Load map image
         SDL_Surface* mapSurface = SDL_LoadBMP("map.bmp");
@@ -199,10 +202,12 @@ public:
                         paused = !paused;
                         break;
                     case SDLK_l:
-                        showCyclops = !showCyclops;
+                        // showCyclops = !showCyclops;
+                        cyclops->setEnabled(!cyclops->getEnabled());
                         break;
                     case SDLK_k:
-                        showFury = !showFury;
+                        // showFury = !showFury;
+                        fury->setEnabled(!fury->getEnabled());
                         break;
                     case SDLK_b:
                         // Back to original area
@@ -235,8 +240,11 @@ public:
         
         if (!mapMode && !paused) {
             bf->loop(dt);
+            cyclops->loop(dt, bf->getX());
+            fury->loop(dt, bf->getX());
             for (auto face : faces)
                 face->loop(dt);
+
         }
     
         
@@ -271,6 +279,8 @@ public:
         // If we’re NOT in map mode, render the game objects 
         if (!mapMode) {
             bf->render(getRen(), flip);
+            fury->render(getRen());
+            cyclops->render(getRen());
             for (auto face : faces)
                 face->render(getRen());
             // rest of the  elements or overlays now show (pause screen, cyclops, fury, etc.)
@@ -278,14 +288,14 @@ public:
                 SDL_Rect pauseRect = {200, 150, 400, 300};
                 SDL_RenderCopy(getRen(), pauseTexture, NULL, &pauseRect);
             }
-            if (showCyclops && cyclopsTexture) {
-                SDL_Rect cyclopsRect = {800 - 378, 100, 378, 661};
-                SDL_RenderCopy(getRen(), cyclopsTexture, NULL, &cyclopsRect);
-            }
-            if (showFury && furyTexture) {
-                SDL_Rect furyRect = {200, 600 - 150, 150, 150};
-                SDL_RenderCopy(getRen(), furyTexture, NULL, &furyRect);
-            }
+            // if (showCyclops && cyclopsTexture) {
+            //     SDL_Rect cyclopsRect = {800 - 378, 100, 378, 661};
+            //     SDL_RenderCopy(getRen(), cyclopsTexture, NULL, &cyclopsRect);
+            // }
+            // if (showFury && furyTexture) {
+            //     SDL_Rect furyRect = {200, 600 - 150, 150, 150};
+            //     SDL_RenderCopy(getRen(), furyTexture, NULL, &furyRect);
+            // }
         }
     
         SDL_RenderPresent(getRen());
@@ -296,6 +306,8 @@ public:
 
     ~MyGame() {
         delete bf;
+        delete cyclops;
+        delete fury;
         delete back;
         if (pauseTexture) SDL_DestroyTexture(pauseTexture);
         if (newAreaOneTexture) SDL_DestroyTexture(newAreaOneTexture);
@@ -303,8 +315,8 @@ public:
         if (newAreaThreeTexture) SDL_DestroyTexture(newAreaThreeTexture);
         if (newAreaFourTexture) SDL_DestroyTexture(newAreaFourTexture);
 
-        if (cyclopsTexture) SDL_DestroyTexture(cyclopsTexture);
-        if (furyTexture) SDL_DestroyTexture(furyTexture);
+        // if (cyclopsTexture) SDL_DestroyTexture(cyclopsTexture);
+        // if (furyTexture) SDL_DestroyTexture(furyTexture);
         if (mapTexture) SDL_DestroyTexture(mapTexture);
         if (greekTextTexture) SDL_DestroyTexture(greekTextTexture);
     }
